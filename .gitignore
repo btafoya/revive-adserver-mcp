@@ -73,3 +73,5 @@ config/local.json
 .env.staging
 credentials.json
 secrets/
+test-mcp-tools.js
+TEST-REPORT.md
