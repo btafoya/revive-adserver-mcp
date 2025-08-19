@@ -1,0 +1,202 @@
+version: '3.8'
+
+services:
+  # Basic Revive MCP Server
+  revive-mcp:
+    build: .
+    container_name: revive-adserver-mcp
+    environment:
+      - REVIVE_API_URL=https://revive.example.com/api
+      - REVIVE_API_USERNAME=mcp_user
+      - REVIVE_API_PASSWORD=secure_password
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # High Availability Setup with Load Balancer
+  revive-mcp-primary:
+    build: .
+    container_name: revive-mcp-primary
+    environment:
+      - REVIVE_API_URL=https://revive-primary.example.com/api
+      - REVIVE_API_USERNAME=primary_user
+      - REVIVE_API_PASSWORD=primary_password
+      - LOG_LEVEL=INFO
+      - REVIVE_MAX_CONNECTIONS=30
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9090
+    volumes:
+      - ./logs/primary:/app/logs
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  revive-mcp-secondary:
+    build: .
+    container_name: revive-mcp-secondary
+    environment:
+      - REVIVE_API_URL=https://revive-secondary.example.com/api
+      - REVIVE_API_USERNAME=secondary_user
+      - REVIVE_API_PASSWORD=secondary_password
+      - LOG_LEVEL=INFO
+      - REVIVE_MAX_CONNECTIONS=30
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9090
+    volumes:
+      - ./logs/secondary:/app/logs
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Load Balancer (HAProxy)
+  load-balancer:
+    image: haproxy:2.8-alpine
+    container_name: revive-mcp-lb
+    ports:
+      - "3000:3000"
+      - "8080:8080"  # HAProxy stats
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - revive-mcp-primary
+      - revive-mcp-secondary
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Redis Cache (optional)
+  redis-cache:
+    image: redis:7-alpine
+    container_name: revive-mcp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: revive-mcp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: revive-mcp-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Log Aggregation (ELK Stack)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: revive-mcp-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.8.0
+    container_name: revive-mcp-logstash
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logs:/var/log/revive-mcp:ro
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.8.0
+    container_name: revive-mcp-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - revive-network
+
+  # Development Environment
+  revive-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: revive-mcp-dev
+    environment:
+      - REVIVE_API_URL=https://dev-revive.example.com/api
+      - REVIVE_API_USERNAME=dev_user
+      - REVIVE_API_PASSWORD=dev_password
+      - LOG_LEVEL=DEBUG
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "9229:9229"  # Node.js debugger
+    restart: unless-stopped
+    networks:
+      - revive-network
+    profiles:
+      - dev
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  elasticsearch-data:
+
+networks:
+  revive-network:
+    driver: bridge
+
+# Health checks
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s

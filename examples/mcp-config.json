@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Revive Adserver MCP Configuration Examples",
+  "description": "Example MCP server configurations for different environments",
+  "examples": [
+    {
+      "name": "Basic Configuration",
+      "description": "Simple setup for development or testing",
+      "config": {
+        "mcpServers": {
+          "revive-adserver": {
+            "command": "node",
+            "args": ["/path/to/revive-adserver-mcp/dist/server.js"],
+            "env": {
+              "REVIVE_API_URL": "https://your-revive-instance.com/api",
+              "REVIVE_API_USERNAME": "your_username",
+              "REVIVE_API_PASSWORD": "your_password"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Development Environment",
+      "description": "Configuration for local development with debugging",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-dev": {
+            "command": "npm",
+            "args": ["run", "dev"],
+            "cwd": "/path/to/revive-adserver-mcp",
+            "env": {
+              "REVIVE_API_URL": "https://dev-revive.example.com/api",
+              "REVIVE_API_USERNAME": "dev_user",
+              "REVIVE_API_PASSWORD": "dev_password",
+              "LOG_LEVEL": "DEBUG",
+              "NODE_ENV": "development"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Production Environment",
+      "description": "Optimized configuration for production deployment",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-prod": {
+            "command": "node",
+            "args": ["/opt/revive-mcp/dist/server.js"],
+            "env": {
+              "REVIVE_API_URL": "https://revive.example.com/api",
+              "REVIVE_API_USERNAME": "prod_mcp_user",
+              "REVIVE_API_PASSWORD": "secure_production_password",
+              "LOG_LEVEL": "WARN",
+              "REVIVE_MAX_CONNECTIONS": "20",
+              "REVIVE_CACHE_TTL": "600",
+              "REVIVE_ENABLE_CACHE": "true",
+              "METRICS_ENABLED": "true"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "High Availability Setup",
+      "description": "Multiple instances for load balancing and failover",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-primary": {
+            "command": "node",
+            "args": ["/opt/revive-mcp/dist/server.js"],
+            "env": {
+              "REVIVE_API_URL": "https://revive-primary.example.com/api",
+              "REVIVE_API_USERNAME": "primary_user",
+              "REVIVE_API_PASSWORD": "primary_password",
+              "LOG_LEVEL": "INFO",
+              "REVIVE_MAX_CONNECTIONS": "30"
+            }
+          },
+          "revive-adserver-secondary": {
+            "command": "node",
+            "args": ["/opt/revive-mcp/dist/server.js"],
+            "env": {
+              "REVIVE_API_URL": "https://revive-secondary.example.com/api",
+              "REVIVE_API_USERNAME": "secondary_user",
+              "REVIVE_API_PASSWORD": "secondary_password",
+              "LOG_LEVEL": "INFO",
+              "REVIVE_MAX_CONNECTIONS": "30"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Docker Deployment",
+      "description": "Configuration using Docker containers",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-docker": {
+            "command": "docker",
+            "args": [
+              "run", "--rm", "-i",
+              "--env-file", "/path/to/.env.production",
+              "revive-adserver-mcp:latest"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Debug Mode",
+      "description": "Enhanced debugging with Node.js inspector",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-debug": {
+            "command": "node",
+            "args": [
+              "--inspect=0.0.0.0:9229",
+              "/path/to/revive-adserver-mcp/dist/server.js"
+            ],
+            "env": {
+              "REVIVE_API_URL": "https://dev-revive.example.com/api",
+              "REVIVE_API_USERNAME": "debug_user",
+              "REVIVE_API_PASSWORD": "debug_password",
+              "LOG_LEVEL": "DEBUG",
+              "DEBUG_API_REQUESTS": "true",
+              "DEBUG_RESPONSES": "true"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Read-Only Mode",
+      "description": "Safe configuration for analytics and reporting only",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-readonly": {
+            "command": "node",
+            "args": ["/path/to/revive-adserver-mcp/dist/server.js"],
+            "env": {
+              "REVIVE_API_URL": "https://revive.example.com/api",
+              "REVIVE_API_USERNAME": "readonly_user",
+              "REVIVE_API_PASSWORD": "readonly_password",
+              "REVIVE_READONLY_MODE": "true",
+              "LOG_LEVEL": "INFO"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Performance Optimized",
+      "description": "Configuration optimized for high-throughput scenarios",
+      "config": {
+        "mcpServers": {
+          "revive-adserver-perf": {
+            "command": "node",
+            "args": [
+              "--max-old-space-size=2048",
+              "/path/to/revive-adserver-mcp/dist/server.js"
+            ],
+            "env": {
+              "REVIVE_API_URL": "https://revive.example.com/api",
+              "REVIVE_API_USERNAME": "perf_user",
+              "REVIVE_API_PASSWORD": "perf_password",
+              "LOG_LEVEL": "WARN",
+              "REVIVE_MAX_CONNECTIONS": "50",
+              "REVIVE_ENABLE_BATCHING": "true",
+              "REVIVE_BATCH_SIZE": "20",
+              "REVIVE_ENABLE_CACHE": "true",
+              "REVIVE_CACHE_TTL": "1800",
+              "REVIVE_ENABLE_COMPRESSION": "true"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
