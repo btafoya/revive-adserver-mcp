@@ -14,20 +14,21 @@ export interface ReviveApiResponse<T = any> {
 }
 
 export interface Campaign {
-  campaignId: number;
-  campaignName: string;
+  id: number;
+  name: string;
   advertiserId: number;
-  status: CampaignStatus;
-  startDate?: string;
-  endDate?: string;
+  status?: string;
+  startDate?: Date;
+  endDate?: Date;
   budget?: number;
-  budgetType?: BudgetType;
-  targetImpressions?: number;
-  targetClicks?: number;
-  weight?: number;
+  budgetType?: string;
   priority?: number;
-  createdAt: string;
-  updatedAt: string;
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum CampaignStatus {
@@ -46,18 +47,22 @@ export enum BudgetType {
 }
 
 export interface Zone {
-  zoneId: number;
-  zoneName: string;
+  id: number;
+  name: string;
   websiteId: number;
-  zoneType: ZoneType;
+  type: string;
   width?: number;
   height?: number;
   description?: string;
-  delivery: DeliveryMethod;
+  delivery?: string;
   frequencyCap?: FrequencyCap;
   targeting?: TargetingRules;
-  createdAt: string;
-  updatedAt: string;
+  code?: string;
+  impressions?: number;
+  clicks?: number;
+  revenue?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum ZoneType {
@@ -89,20 +94,25 @@ export enum TimePeriod {
 }
 
 export interface Banner {
-  bannerId: number;
+  id: number;
+  name: string;
   campaignId: number;
-  bannerName: string;
-  storageType: StorageType;
+  storageType: string;
   imageUrl?: string;
   htmlTemplate?: string;
   width: number;
   height: number;
   weight: number;
-  status: BannerStatus;
+  status?: string;
   clickUrl?: string;
   targeting?: TargetingRules;
-  createdAt: string;
-  updatedAt: string;
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+  conversionRate?: number;
+  revenue?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum StorageType {
@@ -139,19 +149,19 @@ export enum DeviceType {
 }
 
 export interface Statistics {
-  entity: EntityType;
-  entityId: number;
-  period: ReportPeriod;
+  entityType: string;
+  entityId?: number;
+  date: Date;
   impressions: number;
   clicks: number;
-  ctr: number;
-  conversions?: number;
-  conversionRate?: number;
-  revenue?: number;
-  cost?: number;
-  ecpm?: number;
-  startDate: string;
-  endDate: string;
+  conversions: number;
+  clickRate: number;
+  conversionRate: number;
+  revenue: number;
+  cost: number;
+  ecpm: number;
+  ecpc: number;
+  ecpa: number;
 }
 
 export enum EntityType {

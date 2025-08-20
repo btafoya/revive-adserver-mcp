@@ -22,7 +22,7 @@ Create or edit `.mcp.json` in your project directory:
       "command": "node",
       "args": ["/absolute/path/to/revive-adserver-mcp/dist/server.js"],
       "env": {
-        "REVIVE_API_URL": "https://your-revive-instance.com/api",
+        "REVIVE_API_URL": "https://your-revive-instance.com/www/api/v2/xmlrpc/",
         "REVIVE_API_USERNAME": "your_username",
         "REVIVE_API_PASSWORD": "your_password",
         "LOG_LEVEL": "INFO"
@@ -37,7 +37,7 @@ Create or edit `.mcp.json` in your project directory:
 claude-code config add-mcp-server revive-adserver \
   --command node \
   --args "/path/to/revive-adserver-mcp/dist/server.js" \
-  --env REVIVE_API_URL=https://your-revive.com/api \
+  --env REVIVE_API_URL=https://your-revive.com/www/api/v2/xmlrpc/ \
   --env REVIVE_API_USERNAME=username \
   --env REVIVE_API_PASSWORD=password
 ```
@@ -47,7 +47,7 @@ claude-code config add-mcp-server revive-adserver \
 ### Required Variables
 ```bash
 # Revive Adserver API endpoint
-REVIVE_API_URL="https://your-revive-instance.com/api"
+REVIVE_API_URL="https://your-revive-instance.com/www/api/v2/xmlrpc/"
 
 # API authentication credentials
 REVIVE_API_USERNAME="your_api_username"
